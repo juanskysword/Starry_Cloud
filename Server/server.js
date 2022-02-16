@@ -13,6 +13,6 @@ app.get('/' , (req,res) => {
     res.sendFile(path.join(__dirname, '../public/overworld.html'))
 })
 
-const port = process.env.PORT || 4000
+const port = process.env.PORT || 25688
 
 app.listen(port, () => console.log(`server running on ${port}`))
