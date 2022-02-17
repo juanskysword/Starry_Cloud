@@ -6,6 +6,8 @@ let ctx;
 
 let gameLoop;
 let player;
+let borders = [];
+
 
 //input variables (movement)
 let upKey;
@@ -25,7 +27,16 @@ window.onload = function () {
   ctx.fillRect(0, 0, 1280, 720);
 
   // ------ Player Load -------
-  player = new Player(100, 100);
+  player = new Player(200, 200);
+
+  // Create Border // x cordinate= 0, y cordinate
+  for (let i = 0; i < 12; i++) {
+    borders.push(new Border(0 +100* i, 620, 100, 100, 2))
+  }
+  borders.push(new Border(0, 520, 100,100, 2));
+  for (let i = 0; i < 4; i++) {
+    borders.push(new Border(600, 420 + 100*i, 100, 100, 1))
+  }
 
   // game loop
   ///    1000 = 1s  30 is the number its printing like framerates
@@ -51,6 +62,11 @@ function draw() {
 
   //player drawn
   player.draw();
+
+  //Draw borders
+  for (let i = 0; i < borders.length; i++) {
+    borders[i].draw();
+  }
 }
 
 // Giving WASD / Arrow Movement inputs
@@ -77,4 +93,21 @@ function setupInputs() {
       rightKey = false;
     }
   });
+}
+
+// intersection for player and items
+
+function checkIntersection(r1, r2) {
+  console.log(r1, r2) 
+  if (r1.x >= r2.x + r2.width) {
+    return false;
+  } else if (r1.x + r1.width <= r2.x) {
+    return false;
+  } else if (r1.y >= r2.y +r2.height) {
+    return false;
+  } else if (r1.y + r1.height <= r2.y) {
+    return false;
+  } else {
+    return true;
+  }
 }
