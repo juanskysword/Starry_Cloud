@@ -1,113 +1,162 @@
-// drawing variables
-let canvas;
-let ctx;
-
-// Game Variables
-
-let gameLoop;
-let player;
-let borders = [];
-
-
-//input variables (movement)
-let upKey;
-let rightKey;
-let downKey;
-let leftKey;
-
-// //Runs once page loads
-window.onload = function () {
-  //give it a variable
-  canvas = document.getElementById("overworld-canvas");
-  ctx = canvas.getContext("2d");
-
-  // ctx will be like the brush to draw on the canvas
-  ctx.fillStyle = "white";
-  // x, y, width, height
-  ctx.fillRect(0, 0, 1280, 720);
-
-  // ------ Player Load -------
-  player = new Player(200, 200);
-
-  // Create Border // x cordinate= 0, y cordinate
-  for (let i = 0; i < 12; i++) {
-    borders.push(new Border(0 +100* i, 620, 100, 100, 2))
-  }
-  borders.push(new Border(0, 520, 100,100, 2));
-  for (let i = 0; i < 4; i++) {
-    borders.push(new Border(600, 420 + 100*i, 100, 100, 1))
-  }
-
-  // game loop
-  ///    1000 = 1s  30 is the number its printing like framerates
-  gameLoop = setInterval(step, 1000 / 30);
-
-  /// SETUP INPUTS
-
-  setupInputs();
+let canvas = document.getElementById("myCanvas");
+let ctx = canvas.getContext("2d");
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+document.body.style.zoom = "250%";
+let fps = 60;
+let worldTiles = new Image();
+worldTiles.src = "/assets/tiles-overworld.png";
+let rightPressed = false;
+let leftPressed = false;
+let upPressed = false;
+let downPressed = false;
+let player = new Image();
+player.src = "/assets/hero.png";
+let animationCounter = 0;
+let currentAnimation = 0;
+let animationSpeed = 10;
+let lastButtonPressed = "up";
+let playerY = 135;
+let playerX = 116;
+let heartspawn = false;
+let heartImg = new Image();
+heartImg.src = "/assets/heart.png";
+let heart = {
+	x: 0,
+	y: 0
 };
 
-function step() {
-  // console.log("step")
-  player.step();
 
-  //draw everything
-  draw();
+
+heartImg.onload = function() {
+	heartspawn = true
+};
+
+function loadHearts() {
+	if (backgroundReady) {
+		context.drawImage(backgroundImg, 0, 0);
+	}
+
+	if (heartspawn) {
+		context.drawImage(heartImg, heart.x, 
+			heart.y);
+	}
+}
+
+
+function keyDownHandler(e) {
+  if (e.keyCode == 37 || e.keyCode === 65) {
+    leftPressed = true;
+    lastButtonPressed = "left";
+  } else if (e.keyCode === 68 || e.keyCode == 39) {
+    rightPressed = true;
+    lastButtonPressed = "right";
+  } else if (e.keyCode === 87 || e.keyCode == 38) {
+    upPressed = true;
+    lastButtonPressed = "up";
+  } else if (e.keyCode === 83 || e.keyCode == 40) {
+    downPressed = true;
+    lastButtonPressed = "down";
+  }
+}
+
+function keyUpHandler(e) {
+  if (e.keyCode == 37 || e.keyCode === 65) {
+    leftPressed = false;
+  } else if (e.keyCode === 68 || e.keyCode == 39) {
+    rightPressed = false;
+  } else if (e.keyCode === 87 || e.keyCode == 38) {
+    upPressed = false;
+  } else if (e.keyCode === 83 || e.keyCode == 40) {
+    downPressed = false;
+  }
+}
+
+function drawplayer() {
+  let speed = 2;
+  animationCounter++;
+
+  if (leftPressed && !collision(playerX - speed, playerY, Overworld)) {
+    playerX -= speed;
+    if (currentAnimation == 0) {
+      ctx.drawImage(player, 0, 1, 17, 32, playerX, playerY, 17, 32);
+    } else if (currentAnimation == 1) {
+      ctx.drawImage(player, 0, 6, 17, 32, playerX, playerY, 17, 32);
+    }
+    if (animationCounter >= 4) {
+      currentAnimation++;
+      animationCounter = 0;
+      if (currentAnimation > 1) {
+        currentAnimation = 0;
+      }
+    }
+  } else if (rightPressed & !collision(playerX + speed, playerY, Overworld)) {
+    playerX += speed;
+    if (currentAnimation == 0) {
+      ctx.drawImage(player, 0, 1, 16, 31, playerX, playerY, 16, 31);
+    } else if (currentAnimation == 1) {
+      ctx.drawImage(player, 0, 6, 16, 31, playerX, playerY, 16, 31);
+    }
+    if (animationCounter >= 4) {
+      currentAnimation++;
+      animationCounter = 0;
+      if (currentAnimation > 1) {
+        currentAnimation = 0;
+      }
+    }
+  } else if (upPressed & !collision(playerX, playerY - speed, Overworld)) {
+    playerY -= speed;
+    if (currentAnimation == 0) {
+      ctx.drawImage(player, 0, 1, 16, 31, playerX, playerY, 16, 31);
+    } else if (currentAnimation == 1) {
+      ctx.drawImage(player, 0, 6, 16, 31, playerX, playerY, 16, 31);
+    }
+    if (animationCounter >= 4) {
+      currentAnimation++;
+      animationCounter = 0;
+      if (currentAnimation > 1) {
+        currentAnimation = 0;
+      }
+    }
+  } else if (downPressed & !collision(playerX, playerY + speed, Overworld)) {
+    playerY += speed;
+    if (currentAnimation == 0) {
+      ctx.drawImage(player, 0, 1, 16, 31, playerX, playerY, 16, 31);
+    } else if (currentAnimation == 1) {
+      ctx.drawImage(player, 0, 6, 16, 31, playerX, playerY, 16, 31);
+    }
+    if (animationCounter >= 4) {
+      currentAnimation++;
+      animationCounter = 0;
+      if (currentAnimation > 1) {
+        currentAnimation = 0;
+      }
+    }
+  } else {
+    if (lastButtonPressed == "down") {
+      ctx.drawImage(player, 0, 0, 16, 31, playerX, playerY, 16, 31);
+    }
+    if (lastButtonPressed == "up") {
+      ctx.drawImage(player, 0, 0, 16, 31, playerX, playerY, 16, 31);
+    }
+    if (lastButtonPressed == "left") {
+      ctx.drawImage(player, 0, 0, 16, 30, playerX, playerY, 16, 31);
+    }
+    if (lastButtonPressed == "right") {
+      ctx.drawImage(player, 0, 0, 16, 31, playerX, playerY, 16, 31);
+    }
+  }
 }
 
 function draw() {
-  //clear the canvas
-  ctx.fillStyle = "white";
-  ctx.fillRect(0, 0, 1280, 720);
-
-  //player drawn
-  player.draw();
-
-  //Draw borders
-  for (let i = 0; i < borders.length; i++) {
-    borders[i].draw();
-  }
+  setTimeout(function () {
+    requestAnimationFrame(draw);
+    ctx.fillStyle = "rgb(20,20,20)";
+    ctx.fillRect(0, 0, 256, 240);
+    ///all code goes here
+    drawMap(Overworld);
+    drawplayer();
+	loadHearts();
+  }, 1000 / fps);
 }
-
-// Giving WASD / Arrow Movement inputs
-function setupInputs() {
-  document.addEventListener("keydown", function(event) {
-    if (event.key === "w" || event.key === "ArrowUp") {
-      upKey = true;
-    } else if (event.key === "a" || event.key === "ArrowLeft") {
-      leftKey = true;
-    } else if (event.key === "s" || event.key === "ArrowDown") {
-      downKey = true;
-    } else if (event.key === "d" || event.key === "ArrowRight") {
-      rightKey = true;
-    }
-  });
-  document.addEventListener("keyup", function(event) {
-    if (event.key === "w" || event.key === "ArrowUp") {
-      upKey = false;
-    } else if (event.key === "a" || event.key === "ArrowLeft") {
-      leftKey = false;
-    } else if (event.key === "s" || event.key === "ArrowDown") {
-      downKey = false;
-    } else if (event.key === "d" || event.key === "ArrowRight") {
-      rightKey = false;
-    }
-  });
-}
-
-// intersection for player and items
-
-function checkIntersection(r1, r2) {
-  console.log(r1, r2) 
-  if (r1.x >= r2.x + r2.width) {
-    return false;
-  } else if (r1.x + r1.width <= r2.x) {
-    return false;
-  } else if (r1.y >= r2.y +r2.height) {
-    return false;
-  } else if (r1.y + r1.height <= r2.y) {
-    return false;
-  } else {
-    return true;
-  }
-}
+draw();
