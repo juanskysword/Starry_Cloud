@@ -2,10 +2,10 @@
   "name": "starry_night",
   "version": "1.0.0",
   "description": "",
-  "main": "Server/server.js",
+  "main": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node Server/server.js"
+    "start": ""
   },
   "keywords": [],
   "author": "",
